@@ -1,0 +1,98 @@
+.bg-img-for-div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4rem 2rem;
+  background: #f9fafb; 
+}
+
+.rightside {
+  flex: 1 1 50%;
+  padding: 1rem;
+}
+
+.rightside h4 {
+  color: #2563eb;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.bold-head {
+  font-size: 3.3rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+  color: #111827;
+}
+
+.rightside p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  color: #4b5563;
+}
+
+.rightside button {
+  padding: 0.75rem 1.5rem;
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.rightside button:hover {
+  background-color: #1e3a8a;
+}
+
+.left.side {
+  flex: 1 1 50%;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.left.side img {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .bg-img-for-div {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+
+  .rightside,
+  .left.side {
+    flex: 1 1 100%;
+    padding: 1rem 0;
+  }
+
+  .bold-head {
+    font-size: 1.5rem;
+  }
+
+  .rightside button {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .bold-head {
+    font-size: 2rem;
+  }
+
+  .rightside p {
+    font-size: 0.95rem;
+  }
+
+  .rightside button {
+    width: 100%;
+    font-size: 1rem;
+  }
+}
