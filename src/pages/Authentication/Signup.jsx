@@ -3,6 +3,7 @@ import * as Yup from "yup";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../utils/auth";
 import "./Auth.css";
+import Swal from 'sweetalert2'
 
 const SignupSchema = Yup.object().shape({
   name: Yup.string()
@@ -22,18 +23,23 @@ const SignupSchema = Yup.object().shape({
 const Signup = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  const handleSubmit = async (values) => {
     try {
       await registerUser(values.email, values.password, values.name, values.role);
-      alert("Signup successful!");
-      navigate("/login");
+      Swal.fire({
+        title: "Signup Sucessfull!",
+        icon: "success",
+        draggable: true
+      });
+      navigate("/");
     } catch (err) {
-      alert("Error: " + err.message);
-      console.log("errr >>" , err);
-      
-    } finally {
-      setSubmitting(false);
-    }
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+        footer: err.message
+      });
+    } 
   };
 
   return (
