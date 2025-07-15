@@ -1,4 +1,4 @@
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc  } from "firebase/firestore";
 import { db , auth } from "./firebaseConfig"; 
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
