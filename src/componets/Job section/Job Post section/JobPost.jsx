@@ -1,8 +1,7 @@
-import  { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import "./jobpost.css";
-import { postJob } from "../../utils/post";
+import "../job.css";
+import { postJob } from "../../../utils/post";
 
 const JobSchema = Yup.object().shape({
   title: Yup.string().min(3, "Title must be at least 3 characters").required("Title is required"),
@@ -14,8 +13,8 @@ const JobSchema = Yup.object().shape({
   salary: Yup.string().required("Salary is required"),
 });
 
-const JobPost = () => {
-  const initialValues = {
+const JobPost = ({ onPost, onUpdate, initialData = null }) => {
+  const initialValues = initialData || {
     title: "",
     company: "",
     location: "",
@@ -25,14 +24,23 @@ const JobPost = () => {
     salary: "",
   };
 
-  const handleSubmit = async (values, { resetForm }) => {
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      await postJob(values);
-      alert("Job posted successfully!");
+      if (initialData) {
+        await onUpdate(values, initialData.id); 
+        alert("Job updated successfully!");
+      } else {
+        await postJob(values); 
+        alert("Job posted successfully!");
+        if (onPost) onPost(values);
+      }
+
       resetForm();
     } catch (err) {
       console.error("Error posting job:", err);
       alert("Error: " + err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -41,10 +49,11 @@ const JobPost = () => {
       initialValues={initialValues}
       validationSchema={JobSchema}
       onSubmit={handleSubmit}
+      enableReinitialize 
     >
       {({ isSubmitting }) => (
         <Form className="job-post-form">
-          <h2>Post a Job</h2>
+          <h2>{initialData ? "Edit Job" : "Post a Job"}</h2>
 
           <Field name="title" placeholder="Job Title" />
           <ErrorMessage name="title" component="div" className="error" />
@@ -73,7 +82,7 @@ const JobPost = () => {
           <ErrorMessage name="salary" component="div" className="error" />
 
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Posting..." : "Post Job"}
+            {isSubmitting ? (initialData ? "Updating..." : "Posting...") : (initialData ? "Update Job" : "Post Job")}
           </button>
         </Form>
       )}

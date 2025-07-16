@@ -31,7 +31,7 @@ export const logoutUser = async () => {
     await signOut(auth);
     localStorage.clear(); 
     Swal.fire({
-          title: "Logout Sucessfull!",
+          title: "Logout Sucessfully!",
           icon: "success",
           draggable: true
         });

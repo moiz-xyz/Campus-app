@@ -24,6 +24,8 @@ const Navbar = () => {
 
   const isCompany = userData?.role === "Company";
   const isStudent = userData?.role === "Student";
+  console.log(currentUser);
+  
 
   return (
     <nav className="navbar">
@@ -43,6 +45,7 @@ const Navbar = () => {
             <>
               <li><Link to="/jobPost">Post Job</Link></li>
               <li><Link to="/viewjobs">View  Jobs</Link></li>
+              <li><Link to="/viewApplication">View  Application</Link></li>
             </>
           )}
 
