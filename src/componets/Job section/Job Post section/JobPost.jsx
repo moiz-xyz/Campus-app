@@ -2,6 +2,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "../job.css";
 import { postJob } from "../../../utils/post";
+import Swal from 'sweetalert2'
 
 const JobSchema = Yup.object().shape({
   title: Yup.string().min(3, "Title must be at least 3 characters").required("Title is required"),
@@ -28,7 +29,11 @@ const JobPost = ({ onPost, onUpdate, initialData = null }) => {
     try {
       if (initialData) {
         await onUpdate(values, initialData.id); 
-        alert("Job updated successfully!");
+        Swal.fire({
+              title: "Job edited!",
+              icon: "success",
+              draggable: true
+            });
       } else {
         await postJob(values); 
         alert("Job posted successfully!");
@@ -38,7 +43,11 @@ const JobPost = ({ onPost, onUpdate, initialData = null }) => {
       resetForm();
     } catch (err) {
       console.error("Error posting job:", err);
-      alert("Error: " + err.message);
+            Swal.fire({
+              title: "Job edited!",
+              icon: "success",
+              draggable: true
+            });
     } finally {
       setSubmitting(false);
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import "../job.css";
 import { getJobs, updateJob } from "../../../utils/post";
 import { AuthContext } from "../../../context/AuthContext";
@@ -80,8 +80,6 @@ const ViewJobs = () => {
     </div>
   </div>
 )}
-
-
 
               {/* Show Edit/Delete to non-students */}
               {userData?.role !== "Student" && (

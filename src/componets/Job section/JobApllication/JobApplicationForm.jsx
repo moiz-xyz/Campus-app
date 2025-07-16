@@ -25,12 +25,20 @@ const JobApplicationForm = ({ jobId, onClose }) => {
   const handleSubmit = async (values, { resetForm }) => {
     try {
       await responseForjob({ ...values, jobId });
-      alert("Application submitted successfully!");
+      Swal.fire({
+        title: "Job Posted!",
+        icon: "success",
+        draggable: true
+      });
       resetForm();
       onClose(); // close modal
     } catch (error) {
       console.error("Error submitting application:", error);
-      alert("Something went wrong while submitting!");
+      Swal.fire({
+        title: "Job !",
+        icon: "success",
+        draggable: true
+      });
     }
   };
 
