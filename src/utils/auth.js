@@ -21,8 +21,7 @@ export const loginUser = async (email, password) => {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
 
-  localStorage.setItem("userUID", user.uid);
-
+  localStorage.setItem("userUID", user.uid) ;
   return user;
 };
 

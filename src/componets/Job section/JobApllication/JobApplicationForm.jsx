@@ -3,6 +3,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "../job.css";
 import { responseForjob } from "../../../utils/post";
+import Swal from "sweetalert2";
 const JobApplicationForm = ({ jobId, onClose }) => {
   const initialValues = {
     name: "",
@@ -35,7 +36,7 @@ const JobApplicationForm = ({ jobId, onClose }) => {
     } catch (error) {
       console.error("Error submitting application:", error);
       Swal.fire({
-        title: "Job !",
+        title: "Job!",
         icon: "success",
         draggable: true
       });

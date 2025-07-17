@@ -6,7 +6,7 @@ const ViewApplication = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const jobPosterUID = localStorage.getItem("userUID");
+    const jobPosterUID = localStorage.getItem("userUID"); // 👈 Company UID stored in localStorage
 
     if (!jobPosterUID) {
       console.warn("No UID found in localStorage");

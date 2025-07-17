@@ -24,7 +24,7 @@ const Navbar = () => {
 
   const isCompany = userData?.role === "Company";
   const isStudent = userData?.role === "Student";
-  console.log(currentUser);
+
   
 
   return (
