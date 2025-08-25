@@ -6,11 +6,12 @@ import { RadioGroup } from "../ui/radio-group";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "@/utils/constant";
+import { auth, db } from "@/utils/constant";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setUser } from "@/redux/authSlice";
 import { Loader2 } from "lucide-react";
+import { ref, set } from "firebase/database"; 
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -28,6 +29,7 @@ const Signup = () => {
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
@@ -45,6 +47,15 @@ const Signup = () => {
         displayName: input.fullname,
       });
 
+      await set(ref(db, "users/" + firebaseUser.uid), {
+        fullname: input.fullname,
+        email: firebaseUser.email,
+        uid: firebaseUser.uid,
+        phoneNumber: input.phoneNumber,
+        role: input.role,
+      });
+
+      // 4️⃣ Update Redux store
       dispatch(
         setUser({
           fullname: input.fullname,
@@ -55,7 +66,7 @@ const Signup = () => {
         })
       );
 
-      toast.success("Signup successful ");
+      toast.success("Signup successful 🎉");
       navigate("/login");
     } catch (error) {
       console.error(error);
@@ -69,7 +80,8 @@ const Signup = () => {
     if (user) {
       navigate("/");
     }
-  }, []);
+  }, [user]);
+
   return (
     <div>
       <Navbar />
@@ -116,7 +128,7 @@ const Signup = () => {
               value={input.password}
               name="password"
               onChange={changeEventHandler}
-              placeholder="patel@gmail.com"
+              placeholder="********"
             />
           </div>
           <div className="flex items-center justify-between">
@@ -130,7 +142,7 @@ const Signup = () => {
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                 />
-                <Label htmlFor="r1">Student</Label>
+                <Label>Student</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Input
@@ -141,14 +153,13 @@ const Signup = () => {
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                 />
-                <Label htmlFor="r2">Recruiter</Label>
+                <Label>Recruiter</Label>
               </div>
             </RadioGroup>
           </div>
           {loading ? (
             <Button className="w-full my-4">
-              {" "}
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait{" "}
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
             </Button>
           ) : (
             <Button type="submit" className="w-full my-4">
