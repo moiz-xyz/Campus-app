@@ -21,9 +21,6 @@ const useGetAppliedJobs = () => {
             applications.push({ id, ...data[id] });
           }
         }
-
-        console.log(applications);
-
         // Dispatch to redux
         dispatch(setAllAppliedJobs(applications));
       } catch (error) {
