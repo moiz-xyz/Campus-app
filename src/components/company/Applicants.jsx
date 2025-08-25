@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-import Navbar from '../shared/Navbar';
-import ApplicantsTable from './ApplicantsTable';
-import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { setAllApplicants } from '@/redux/applicationSlice';
+import React, { useEffect } from "react";
+import Navbar from "../shared/Navbar";
+import ApplicantsTable from "./ApplicantsTable";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setAllApplicants } from "@/redux/applicationSlice";
 
-import { db } from '@/utils/constant';
-import { ref, get } from 'firebase/database';
+import { db } from "@/utils/constant";
+import { ref, get } from "firebase/database";
 
 const Applicants = () => {
   const params = useParams();
@@ -16,20 +16,28 @@ const Applicants = () => {
   useEffect(() => {
     const fetchAllApplicants = async () => {
       try {
-        // Reference to the job in Realtime DB
         const jobRef = ref(db, `jobs/${params.id}`);
         const snapshot = await get(jobRef);
 
         if (snapshot.exists()) {
           const jobData = snapshot.val();
 
-          // applications array/object inside the job
-          dispatch(setAllApplicants(jobData));
+          // Convert applications object to array if needed
+          const applicationsArray = jobData.applications
+            ? Object.keys(jobData.applications).map((key) => ({
+                applicantId: key,
+                ...jobData.applications[key],
+              }))
+            : [];
+
+          dispatch(
+            setAllApplicants({ ...jobData, applications: applicationsArray })
+          );
         } else {
-          console.log('No such job!');
+          console.log("No such job!");
         }
       } catch (error) {
-        console.error('Error fetching applicants:', error);
+        console.error("Error fetching applicants:", error);
       }
     };
 

@@ -4,7 +4,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, db } from "@/utils/constant"; 
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
@@ -44,20 +44,26 @@ const Login = () => {
       if (snapshot.exists()) {
         const userData = snapshot.val();
 
+        if (userData.isDeleted === true || userData.status === "blocked") {
+          await signOut(auth);
+          toast.error("Your account has been blocked by Admin.");
+          return;
+        }
+
         dispatch(
           setUser({
             fullname: userData.fullname,
             email: userData.email,
-            uid: userData.uid,
+            uid: firebaseUser.uid,
             phoneNumber: userData.phoneNumber,
             role: userData.role,
           })
         );
-        console.log(setUser);
-        toast.success("Login successful ");
+
+        toast.success("Login successful");
         navigate("/");
       } else {
-        toast.error("No user data found");
+        toast.error("No user data found in database ");
       }
     } catch (error) {
       console.error(error);
@@ -105,7 +111,7 @@ const Login = () => {
           </div>
 
           {loading ? (
-            <Button className="w-full my-4">
+            <Button className="w-full my-4" disabled>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
             </Button>
           ) : (

@@ -12,8 +12,11 @@ const Home = () => {
   const { user } = useSelector(store => store.auth);
   const navigate = useNavigate();
   useEffect(() => {
-    if (user?.role === 'recruiter') {
-      navigate("/companies");
+    if (user?.role === 'company') {
+      navigate("/company/jobs");
+    }
+       if (user?.role === 'admin') {
+      navigate("admin/users");
     }
   }, []);
   return (

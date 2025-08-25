@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,77 +9,86 @@ import {
   TableRow,
 } from "../ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import {  MoreHorizontal, Ban, Unlock } from "lucide-react";
+import { MoreHorizontal, Ban, Unlock } from "lucide-react";
 import { useSelector } from "react-redux";
 import { getDatabase, ref, update } from "firebase/database";
 import { toast } from "sonner";
 
-const CompaniesTable = () => {
+const UsersTable = () => {
   const { companies, searchCompanyByText } = useSelector(
     (store) => store.company
   );
-  const [filterCompany, setFilterCompany] = useState(companies);
+  const [filterUsers, setFilterUsers] = useState(companies);
   const db = getDatabase();
 
   useEffect(() => {
-    const filteredCompany =
+    const filtered =
       companies.length >= 0 &&
-      companies.filter((company) => {
-        if (!searchCompanyByText) {
-          return true;
-        }
-        return company?.name
+      companies.filter((user) => {
+        if (!searchCompanyByText) return true;
+        return user?.fullname
           ?.toLowerCase()
           .includes(searchCompanyByText.toLowerCase());
       });
-    setFilterCompany(filteredCompany);
+    setFilterUsers(filtered);
   }, [companies, searchCompanyByText]);
 
-  const toggleBlockCompany = async (company) => {
-    const newStatus = company.status === "blocked" ? "active" : "blocked";
-    await update(ref(db, `companies/${company.id}`), {
+  const toggleBlockUser = async (user) => {
+    const isCurrentlyBlocked = user.status === "blocked";
+    const newStatus = isCurrentlyBlocked ? "active" : "blocked";
+    const newIsDeleted = isCurrentlyBlocked ? false : true;
+
+    await update(ref(db, `users/${user.id}`), {
       status: newStatus,
+      isDeleted: newIsDeleted,
     });
-    toast(`Company ${newStatus === "blocked" ? "Blocked" : "Unblocked"} Successfully!`);
+
+    setFilterUsers((prev) =>
+      prev.map((u) =>
+        u.id === user.id
+          ? { ...u, status: newStatus, isDeleted: newIsDeleted }
+          : u
+      )
+    );
+
+    toast(
+      `User ${newStatus === "blocked" ? "Blocked" : "Unblocked"} Successfully!`
+    );
   };
 
   return (
     <div>
       <Table>
-        <TableCaption>A list of your recent registered companies</TableCaption>
+        <TableCaption>A list of registered company users</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Website</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead>Full Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Phone</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead className="text-right">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filterCompany?.map((company) => (
-            <TableRow key={company.id}>
-              <TableCell>{company.name}</TableCell>
-              <TableCell>{company.website || "N/A"}</TableCell>
-              <TableCell>{company.location || "N/A"}</TableCell>
-              <TableCell>
-                {company.createdAt
-                  ? new Date(company.createdAt).toLocaleDateString()
-                  : "N/A"}
-              </TableCell>
+          {filterUsers?.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell>{user.fullname}</TableCell>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.phoneNumber || "N/A"}</TableCell>
+              <TableCell>{user.role}</TableCell>
+              <TableCell>{user.status || "active"}</TableCell>
               <TableCell className="text-right cursor-pointer">
                 <Popover>
                   <PopoverTrigger>
                     <MoreHorizontal />
                   </PopoverTrigger>
                   <PopoverContent className="w-40">
-
-
                     <div
-                      onClick={() => toggleBlockCompany(company)}
+                      onClick={() => toggleBlockUser(user)}
                       className="flex items-center gap-2 w-fit cursor-pointer text-red-600"
                     >
-                      {company.status === "blocked" ? (
+                      {user.status === "blocked" ? (
                         <>
                           <Unlock className="w-4" />
                           <span>Unblock</span>
@@ -102,4 +111,4 @@ const CompaniesTable = () => {
   );
 };
 
-export default CompaniesTable;
+export default UsersTable;

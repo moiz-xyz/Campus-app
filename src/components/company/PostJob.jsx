@@ -4,15 +4,17 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useSelector } from "react-redux";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
-import { db } from "@/utils/constant"; 
+import { db } from "@/utils/constant";
 import { ref, push, set } from "firebase/database";
 
 const PostJob = () => {
+  const { user } = useSelector((store) => store.auth); // 👈 logged-in user (company)
+  const navigate = useNavigate();
+
   const [input, setInput] = useState({
     title: "",
     description: "",
@@ -22,41 +24,33 @@ const PostJob = () => {
     jobType: "",
     experience: "",
     position: 0,
-    companyId: "",
+    companyId: user?.uid || "", // 👈 direct set
   });
 
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { companies } = useSelector((store) => store.company);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
 
-  const selectChangeHandler = (value) => {
-    const selectedCompany = companies.find(
-      (company) => company.name.toLowerCase() === value
-    );
-    setInput({ ...input, companyId: selectedCompany?.id });
-  };
-
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (!input.companyId) {
-      toast.error("Please select a company before posting!");
+    if (!user || user.role !== "company") {
+      toast.error("Only companies can post jobs!");
       return;
     }
 
     try {
       setLoading(true);
 
-      // Create a new reference (auto-generated key) in Realtime DB
       const newJobRef = push(ref(db, "jobs"));
       await set(newJobRef, {
         ...input,
-        createdAt: Date.now(), // timestamp
-        applications: [],      // start empty
+        companyId: user.uid,   
+        companyName: user.fullname,
+        createdAt: Date.now(),
+        applications: [],
       });
 
       toast.success("Job posted successfully!");
@@ -141,7 +135,7 @@ const PostJob = () => {
             <div>
               <Label>Experience Level</Label>
               <Input
-                type="text"
+                type="number"
                 name="experience"
                 value={input.experience}
                 onChange={changeEventHandler}
@@ -158,26 +152,8 @@ const PostJob = () => {
                 className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
               />
             </div>
-            {companies.length > 0 && (
-              <Select onValueChange={selectChangeHandler}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select a Company" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {companies.map((company) => (
-                      <SelectItem
-                        key={company.id}
-                        value={company?.name?.toLowerCase()}
-                      >
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            )}
           </div>
+
           {loading ? (
             <Button className="w-full my-4">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
@@ -186,11 +162,6 @@ const PostJob = () => {
             <Button type="submit" className="w-full my-4">
               Post New Job
             </Button>
-          )}
-          {companies.length === 0 && (
-            <p className="text-xs text-red-600 font-bold text-center my-3">
-              *Please register a company first, before posting a job
-            </p>
           )}
         </form>
       </div>

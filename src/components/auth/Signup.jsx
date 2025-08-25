@@ -6,7 +6,7 @@ import { RadioGroup } from "../ui/radio-group";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, db } from "@/utils/constant";
+import { auth, db } from "@/utils/constant"; 
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setUser } from "@/redux/authSlice";
@@ -53,9 +53,9 @@ const Signup = () => {
         uid: firebaseUser.uid,
         phoneNumber: input.phoneNumber,
         role: input.role,
+        isDeleted: false  
       });
 
-      // 4️⃣ Update Redux store
       dispatch(
         setUser({
           fullname: input.fullname,
@@ -66,7 +66,7 @@ const Signup = () => {
         })
       );
 
-      toast.success("Signup successful 🎉");
+      toast.success("Signup successful ");
       navigate("/login");
     } catch (error) {
       console.error(error);
@@ -98,7 +98,7 @@ const Signup = () => {
               value={input.fullname}
               name="fullname"
               onChange={changeEventHandler}
-              placeholder="patel"
+              placeholder="John Doe"
             />
           </div>
           <div className="my-2">
@@ -108,7 +108,7 @@ const Signup = () => {
               value={input.email}
               name="email"
               onChange={changeEventHandler}
-              placeholder="patel@gmail.com"
+              placeholder="exampe@.com"
             />
           </div>
           <div className="my-2">
@@ -148,12 +148,12 @@ const Signup = () => {
                 <Input
                   type="radio"
                   name="role"
-                  value="recruiter"
-                  checked={input.role === "recruiter"}
+                  value="company"
+                  checked={input.role === "company"}
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                 />
-                <Label>Recruiter</Label>
+                <Label>Company</Label>
               </div>
             </RadioGroup>
           </div>

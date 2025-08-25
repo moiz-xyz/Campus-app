@@ -20,7 +20,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     email: user?.email || "",
     phoneNumber: user?.phoneNumber || "",
     bio: user?.bio || "",
-    skills: user?.skills || ""
+    skills: user?.skills || "",
+    about: user?.about || ""   // 👈 Company ke liye new field
   });
 
   const changeEventHandler = (e) => {
@@ -33,34 +34,34 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     try {
       setLoading(true);
 
-      // Reference to the user in Realtime Database
       const userRef = ref(db, `users/${user.uid}`);
 
-      // Update fields in Realtime Database
-      await update(userRef, {
+      const updateData = {
         fullname: input.fullname,
         email: input.email,
         phoneNumber: input.phoneNumber,
         bio: input.bio,
-        skills: input.skills
-      });
+      };
 
-      // Update Redux store as well
+      if (user.role === "student") {
+        updateData.skills = input.skills;
+      } else if (user.role === "company") {
+        updateData.about = input.about;
+      }
+
+      await update(userRef, updateData);
+
       dispatch(setUser({
         ...user,
-        fullname: input.fullname,
-        email: input.email,
-        phoneNumber: input.phoneNumber,
-        bio: input.bio,
-        skills: input.skills
+        ...updateData
       }));
 
-      toast.success("Profile updated successfully ✅");
+      toast.success("Profile updated successfully");
       setOpen(false);
 
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update profile ❌");
+      toast.error("Failed to update profile ");
     } finally {
       setLoading(false);
     }
@@ -117,23 +118,40 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   className="col-span-3"
                 />
               </div>
-              <div className='grid grid-cols-4 items-center gap-4'>
-                <Label htmlFor="skills" className="text-right">Skills</Label>
-                <Input
-                  id="skills"
-                  name="skills"
-                  value={input.skills}
-                  onChange={changeEventHandler}
-                  className="col-span-3"
-                />
-              </div>
+
+              {user.role === "student" ? (
+                <div className='grid grid-cols-4 items-center gap-4'>
+                  <Label htmlFor="skills" className="text-right">Skills</Label>
+                  <Input
+                    id="skills"
+                    name="skills"
+                    value={input.skills}
+                    onChange={changeEventHandler}
+                    className="col-span-3"
+                  />
+                </div>
+              ) : (
+                <div className='grid grid-cols-4 items-center gap-4'>
+                  <Label htmlFor="about" className="text-right">About</Label>
+                  <Input
+                    id="about"
+                    name="about"
+                    value={input.about}
+                    onChange={changeEventHandler}
+                    className="col-span-3"
+                  />
+                </div>
+              )}
+
             </div>
             <DialogFooter>
-              {
-                loading
-                  ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button>
-                  : <Button type="submit" className="w-full my-4">Update</Button>
-              }
+              {loading ? (
+                <Button className="w-full my-4">
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait
+                </Button>
+              ) : (
+                <Button type="submit" className="w-full my-4">Update</Button>
+              )}
             </DialogFooter>
           </form>
         </DialogContent>

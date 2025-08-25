@@ -5,21 +5,18 @@ import { useParams } from "react-router-dom";
 import { db } from "@/utils/constant";
 import { ref, get, update } from "firebase/database";
 import { setSingleJob } from "@/redux/jobSlice";
+import { setAllApplicants } from "@/redux/applicationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
 const JobDescription = () => {
   const { singleJob } = useSelector((store) => store.job);
   const { user } = useSelector((store) => store.auth);
-  console.log(user);
-  
+  const dispatch = useDispatch();
 
   const [isApplied, setIsApplied] = useState(false);
-
   const params = useParams();
   const jobId = params.id;
-
-  const dispatch = useDispatch();
 
   const applyJobHandler = async () => {
     if (!user) {
@@ -31,8 +28,8 @@ const JobDescription = () => {
       const jobRef = ref(db, `jobs/${jobId}`);
       const snapshot = await get(jobRef);
       const jobData = snapshot.val() || {};
-
       const existingApplications = jobData.applications || [];
+
       const alreadyApplied = existingApplications.some(
         (app) => app.applicantId === user.uid
       );
@@ -45,6 +42,9 @@ const JobDescription = () => {
       const newApplication = {
         applicantId: user.uid,
         email: user.email,
+        fullname: user.fullname,
+        phoneNumber: user.phoneNumber,
+        status : "Pending",
         appliedAt: Date.now(),
       };
 
@@ -54,13 +54,9 @@ const JobDescription = () => {
 
       setIsApplied(true);
 
-      dispatch(
-        setSingleJob({
-          ...jobData,
-          id: jobId,
-          applications: [...existingApplications, newApplication],
-        })
-      );
+      // Redux update
+      dispatch(setSingleJob({ ...jobData, id: jobId, applications: [...existingApplications, newApplication] }));
+      dispatch(setAllApplicants([...existingApplications, newApplication]));
 
       toast.success("Applied successfully!");
     } catch (error) {
@@ -69,7 +65,6 @@ const JobDescription = () => {
     }
   };
 
-  // Fetch single job
   useEffect(() => {
     const fetchSingleJob = async () => {
       try {
@@ -77,8 +72,8 @@ const JobDescription = () => {
         const snapshot = await get(jobRef);
         if (snapshot.exists()) {
           const jobData = snapshot.val();
-
           dispatch(setSingleJob({ id: jobId, ...jobData }));
+          dispatch(setAllApplicants(jobData.applications || []));
 
           const alreadyApplied = jobData.applications?.some(
             (app) => app.applicantId === user?.uid
@@ -100,13 +95,13 @@ const JobDescription = () => {
         <div>
           <h1 className="font-bold text-xl">{singleJob?.title}</h1>
           <div className="flex items-center gap-2 mt-4">
-            <Badge className="text-blue-700 font-bold" variant="ghost">
+            <Badge variant="ghost" className="text-blue-700 font-bold">
               {singleJob?.position} Positions
             </Badge>
-            <Badge className="text-[#F83002] font-bold" variant="ghost">
+            <Badge variant="ghost" className="text-[#F83002] font-bold">
               {singleJob?.jobType}
             </Badge>
-            <Badge className="text-[#7209b7] font-bold" variant="ghost">
+            <Badge variant="ghost" className="text-[#7209b7] font-bold">
               {singleJob?.salary}
             </Badge>
           </div>
@@ -129,26 +124,26 @@ const JobDescription = () => {
       </h1>
       <div className="my-4">
         <h1 className="font-bold my-1">
-          Role: <span className="pl-4 font-normal text-gray-800">{singleJob?.title}</span>
+          Role: <span className="pl-4 font-normal">{singleJob?.title}</span>
         </h1>
         <h1 className="font-bold my-1">
-          Location: <span className="pl-4 font-normal text-gray-800">{singleJob?.location}</span>
+          Location: <span className="pl-4 font-normal">{singleJob?.location}</span>
         </h1>
         <h1 className="font-bold my-1">
-          Description: <span className="pl-4 font-normal text-gray-800">{singleJob?.description}</span>
+          Description: <span className="pl-4 font-normal">{singleJob?.description}</span>
         </h1>
         <h1 className="font-bold my-1">
-          Experience: <span className="pl-4 font-normal text-gray-800">{singleJob?.experience} yrs</span>
+          Experience: <span className="pl-4 font-normal">{singleJob?.experience} yrs</span>
         </h1>
         <h1 className="font-bold my-1">
-          Salary: <span className="pl-4 font-normal text-gray-800">{singleJob?.salary}</span>
+          Salary: <span className="pl-4 font-normal">{singleJob?.salary}</span>
         </h1>
         <h1 className="font-bold my-1">
-          Total Applicants: <span className="pl-4 font-normal text-gray-800">{singleJob?.applications?.length || 0}</span>
+          Total Applicants: <span className="pl-4 font-normal">{singleJob?.applications?.length || 0}</span>
         </h1>
         <h1 className="font-bold my-1">
           Posted Date:{" "}
-          <span className="pl-4 font-normal text-gray-800">
+          <span className="pl-4 font-normal">
             {singleJob?.createdAt ? new Date(singleJob.createdAt).toLocaleDateString() : "N/A"}
           </span>
         </h1>

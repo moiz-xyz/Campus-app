@@ -4,12 +4,12 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button' 
 import { useNavigate } from 'react-router-dom' 
 import { useDispatch } from 'react-redux' 
-import useGetAllAdminJobs from '@/hooks/useGetAllAdminJobs'
+import useGetCompanyJobs from '@/hooks/useGetCompanyJobs'
 import { setSearchJobByText } from '@/redux/jobSlice'
 import CompanyJobsTable from './CompanyJobsTable'
 
 const CompanyJobs = () => {
-  useGetAllAdminJobs();
+  useGetCompanyJobs();
   const [input, setInput] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();

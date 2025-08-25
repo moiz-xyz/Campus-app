@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,10 +9,46 @@ import {
   TableRow,
 } from "./ui/table";
 import { Badge } from "./ui/badge";
+import {  ref, get } from "firebase/database";
 import { useSelector } from "react-redux";
+import { db } from "@/utils/constant";
 
 const AppliedJobTable = () => {
-  const { allAppliedJobs } = useSelector((store) => store.job);
+  const { user } = useSelector((store) => store.auth);
+  const [appliedJobs, setAppliedJobs] = useState([]);
+
+  useEffect(() => {
+    const fetchAppliedJobs = async () => {
+      const jobsRef = ref(db, "jobs");
+      const snapshot = await get(jobsRef);
+      if (snapshot.exists()) {
+        const jobsData = snapshot.val();
+
+        const userAppliedJobs = Object.entries(jobsData)
+          .filter(([ job]) =>
+            job.applications?.some((app) => app.applicantId === user.uid)
+          )
+          .map(([jobId, job]) => ({
+            id: jobId,
+            ...job,
+          }));
+
+        const companiesRef = ref(db, "companies");
+        const companiesSnap = await get(companiesRef);
+        const companiesData = companiesSnap.val() || {};
+
+        const jobsWithCompany = userAppliedJobs.map((job) => ({
+          ...job,
+          company: companiesData[job.companyId] || null,
+        }));
+
+        setAppliedJobs(jobsWithCompany);
+      }
+    };
+
+    if (user) fetchAppliedJobs();
+  }, [user]);
+
   return (
     <div>
       <Table>
@@ -26,26 +62,20 @@ const AppliedJobTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {allAppliedJobs.length <= 0 ? (
+          {appliedJobs.length <= 0 ? (
             <span>You haven't applied any job yet.</span>
           ) : (
-            allAppliedJobs.map((appliedJob) => (
-              <TableRow key={appliedJob.id}>
-                <TableCell>{appliedJob?.createdAt?.split("T")[0]}</TableCell>
-                <TableCell>{appliedJob.job?.title}</TableCell>
-                <TableCell>{appliedJob.job?.company?.name}</TableCell>
+            appliedJobs.map((job) => (
+              <TableRow key={job.id}>
+                <TableCell>
+                  {job?.createdAt
+                    ? new Date(job.createdAt).toLocaleDateString()
+                    : "N/A"}
+                </TableCell>
+                <TableCell>{job.title}</TableCell>
+                <TableCell>{job.company?.name || "Unknown"}</TableCell>
                 <TableCell className="text-right">
-                  <Badge
-                    className={`${
-                      appliedJob?.status === "rejected"
-                        ? "bg-red-400"
-                        : appliedJob.status === "pending"
-                        ? "bg-gray-400"
-                        : "bg-green-400"
-                    }`}
-                  >
-                    {appliedJob.status.toUpperCase()}
-                  </Badge>
+                  <Badge className="bg-gray-400">Pending</Badge>
                 </TableCell>
               </TableRow>
             ))

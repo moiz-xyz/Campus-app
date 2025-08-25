@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -47,13 +47,13 @@ const AdminJobsTable = () => {
         <TableBody>
           {filterJobs?.map((job) => (
             <tr>
-              <TableCell>{job?.company?.name}</TableCell>
-              <TableCell>{job?.title}</TableCell>
+              <TableCell>{job.companyName}</TableCell>
+              <TableCell>{job.title}</TableCell>
               <TableCell>
                 {job?.createdAt
-                  ? new Date(job.createdAt.seconds * 1000)
-                      .toISOString()
-                      .split("T")[0]
+                  ? job.createdAt.seconds
+                    ? new Date(job.createdAt.seconds * 1000).toLocaleString() 
+                    : new Date(job.createdAt).toLocaleString()
                   : "N/A"}
               </TableCell>
 

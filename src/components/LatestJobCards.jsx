@@ -1,7 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ref, get } from "firebase/database";
+import { db } from "@/utils/constant";
+import { Loader2 } from "lucide-react"; 
 
-const LatestJobCards = ({ job }) => {    
+const LatestJobCards = ({ job }) => {
+  const [isCompanyDeleted, setIsCompanyDeleted] = useState(null); 
+
+  useEffect(() => {
+    if (job?.companyId) {
+      const companyRef = ref(db, `users/${job.companyId}/isDeleted`);
+      get(companyRef).then((snapshot) => {
+        if (snapshot.exists() && snapshot.val() === true) {
+          setIsCompanyDeleted(true);
+        } else {
+          setIsCompanyDeleted(false);
+        }
+      });
+    }
+  }, [job?.companyId]);
+
+  if (isCompanyDeleted === null) {
+    return (
+      <div className="flex items-center justify-center p-5">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
+      </div>
+    );
+  }
+
+  if (isCompanyDeleted) return null;
+
   return (
     <Link to={`/description/${job.id}`}>
       <div className="p-5 border rounded-xl shadow-md hover:shadow-lg transition cursor-pointer">

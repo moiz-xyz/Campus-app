@@ -10,7 +10,7 @@ const ProtectedComapnyRoute = ({children}) => {
     const navigate = useNavigate();
 
     useEffect(()=>{
-        if(user === null || user.role !== 'recruiter'){
+        if(user === null || user.role !== 'company'){
             navigate("/");
         }
     },[]);

@@ -9,29 +9,44 @@ import {
   TableRow,
 } from "../ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Edit2, Eye, MoreHorizontal } from "lucide-react";
+import { Edit2, Eye, Trash2, MoreHorizontal } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { db } from "@/utils/constant";
+import { ref, remove } from "firebase/database";
+import { toast } from "sonner";
 
 const CompanyJobsTable = () => {
   const { allAdminJobs, searchJobByText } = useSelector((store) => store.job);
-  const { companies } = useSelector((store) => store.company);
-
   const [filterJobs, setFilterJobs] = useState(allAdminJobs);
   const navigate = useNavigate();
 
   useEffect(() => {
     const filteredJobs = allAdminJobs.filter((job) => {
-      if (!searchJobByText) {
-        return true;
-      }
+      if (!searchJobByText) return true;
       return (
         job?.title?.toLowerCase().includes(searchJobByText.toLowerCase()) ||
-        job?.company?.name.toLowerCase().includes(searchJobByText.toLowerCase())
+        job?.companyName?.toLowerCase().includes(searchJobByText.toLowerCase())
       );
     });
     setFilterJobs(filteredJobs);
   }, [allAdminJobs, searchJobByText]);
+
+const handleDeleteJob = async (jobId) => {
+  try {
+    const jobRef = ref(db, `jobs/${jobId}`);
+    await remove(jobRef);
+
+    setFilterJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
+
+    toast.success("Job deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting job:", error);
+    toast.error("Failed to delete job");
+  }
+};
+
+
   return (
     <div>
       <Table>
@@ -46,10 +61,8 @@ const CompanyJobsTable = () => {
         </TableHeader>
         <TableBody>
           {filterJobs?.map((job) => (
-            <tr>
-              <TableCell>
-                {companies.find((c) => c.id === job.companyId)?.name || "N/A"}
-              </TableCell>
+            <TableRow key={job.id}>
+              <TableCell>{job?.companyName || "N/A"}</TableCell>
               <TableCell>{job?.title}</TableCell>
               <TableCell>
                 {job?.createdAt
@@ -64,7 +77,7 @@ const CompanyJobsTable = () => {
                   </PopoverTrigger>
                   <PopoverContent className="w-32">
                     <div
-                      onClick={() => navigate(`/companies/${job.id}`)}
+                      onClick={() => navigate(`/company/jobs/${job.id}`)}
                       className="flex items-center gap-2 w-fit cursor-pointer"
                     >
                       <Edit2 className="w-4" />
@@ -77,10 +90,17 @@ const CompanyJobsTable = () => {
                       <Eye className="w-4" />
                       <span>Applicants</span>
                     </div>
+                    <div
+                      onClick={() => handleDeleteJob(job.id)}
+                      className="flex items-center w-fit gap-2 cursor-pointer mt-2 text-red-600"
+                    >
+                      <Trash2 className="w-4" />
+                      <span>Delete</span>
+                    </div>
                   </PopoverContent>
                 </Popover>
               </TableCell>
-            </tr>
+            </TableRow>
           ))}
         </TableBody>
       </Table>

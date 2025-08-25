@@ -1,29 +1,72 @@
-import React from 'react';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { MoreHorizontal } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import { toast } from 'sonner';
-import { db } from '@/utils/constant';
-import { ref, update } from 'firebase/database';
+import React, { useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { MoreHorizontal } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "sonner";
+import { db } from "@/utils/constant";
+import { ref, get, update } from "firebase/database";
+import { setAllApplicants } from "@/redux/applicationSlice";
 
-const shortlistingStatus = ['Accepted', 'Rejected'];
+const shortlistingStatus = ["Accepted", "Rejected"];
 
-const ApplicantsTable = () => {
+const ApplicantsTable = ({ jobId }) => {
+  const dispatch = useDispatch();
   const { applicants } = useSelector((store) => store.application);
-  console.log(applicants);
 
-  const statusHandler = async (status, applicantId) => {
+  // Function to fetch applicants from DB
+  const fetchApplicants = async () => {
     try {
-      const applicantRef = ref(db, `applications/${applicantId}`);
-      await update(applicantRef, { status });
+      const jobRef = ref(db, `jobs/${jobId}`);
+      const snapshot = await get(jobRef);
 
-      toast.success(`Status updated to ${status}`);
+      if (snapshot.exists()) {
+        const jobData = snapshot.val();
+        dispatch(setAllApplicants(jobData));
+      }
     } catch (error) {
-      console.error('Error updating status:', error);
-      toast.error('Failed to update status');
+      console.error("Error fetching applicants:", error);
+      toast.error("Failed to fetch applicants");
     }
   };
+
+  useEffect(() => {
+    fetchApplicants();
+  }, [jobId]);
+
+  // Update status in DB and refresh list
+const statusHandler = async (status, applicantId) => {
+  try {
+    const jobRef = ref(db, `jobs/${jobId}`);
+    const snapshot = await get(jobRef);
+
+    if (!snapshot.exists()) return;
+
+    const jobData = snapshot.val();
+    const applications = jobData.applications || [];
+
+    const index = applications.findIndex(a => a.applicantId === applicantId);
+    if (index === -1) return;
+
+    const applicantRef = ref(db, `jobs/${jobId}/applications/${index}`);
+    await update(applicantRef, { status });
+
+    toast.success(`Status updated to ${status}`);
+    fetchApplicants(); // refresh list
+  } catch (error) {
+    console.error("Error updating status:", error);
+    toast.error("Failed to update status");
+  }
+};
+
 
   return (
     <div>
@@ -36,35 +79,37 @@ const ApplicantsTable = () => {
             <TableHead>Contact</TableHead>
             <TableHead>Resume</TableHead>
             <TableHead>Date</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead className="text-right">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {applicants &&
-            applicants?.applications?.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>{item?.applicant?.fullname}</TableCell>
-                <TableCell>{item?.applicant?.email}</TableCell>
-                <TableCell>{item?.applicant?.phoneNumber}</TableCell>
+          {Array.isArray(applicants?.applications) &&
+            applicants.applications.map((item) => (
+              <TableRow key={item.applicantId}>
+                <TableCell>{item.fullname || "NA"}</TableCell>
+                <TableCell>{item.email || "NA"}</TableCell>
+                <TableCell>{item.phoneNumber || "NA"}</TableCell>
                 <TableCell>
-                  {item.applicant?.profile?.resume ? (
+                  {item.resume ? (
                     <a
                       className="text-blue-600 cursor-pointer"
-                      href={item?.applicant?.profile?.resume}
+                      href={item.resume}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {item?.applicant?.profile?.resumeOriginalName}
+                      {item.resumeOriginalName}
                     </a>
                   ) : (
                     <span>NA</span>
                   )}
                 </TableCell>
                 <TableCell>
-                  {item?.createdAt
-                    ? new Date(item.createdAt).toLocaleDateString()
-                    : 'NA'}
+                  {item.appliedAt
+                    ? new Date(item.appliedAt).toLocaleDateString()
+                    : "NA"}
                 </TableCell>
+                <TableCell>{item.status || "Pending"}</TableCell>
                 <TableCell className="float-right cursor-pointer">
                   <Popover>
                     <PopoverTrigger>
@@ -73,7 +118,9 @@ const ApplicantsTable = () => {
                     <PopoverContent className="w-32">
                       {shortlistingStatus.map((status, index) => (
                         <div
-                          onClick={() => statusHandler(status, item.id)}
+                          onClick={() =>
+                            statusHandler(status, item.applicantId)
+                          }
                           key={index}
                           className="flex w-fit items-center my-2 cursor-pointer"
                         >

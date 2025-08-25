@@ -37,14 +37,33 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-12">
           <ul className="flex font-medium items-center gap-5">
-            {user && user.role === "recruiter" ? (
+            {user ? (
               <>
-                <li>
-                  <Link to="/companies">Companies</Link>
-                </li>
-                <li>
-                  <Link to="/company/jobs">Jobs</Link>
-                </li>
+                {user.role === "admin" && (
+                  <>
+                    <li>
+                      <Link to="/admin/users">Users</Link>
+                    </li>
+                    <li>
+                      <Link to="/admin/jobs">Jobs</Link>
+                    </li>
+                  </>
+                )}
+                {user.role === "company" && (
+                  <li>
+                    <Link to="/company/jobs">Jobs</Link>
+                  </li>
+                )}
+                {user.role === "student" && (
+                  <>
+                    <li>
+                      <Link to="/">Home</Link>
+                    </li>
+                    <li>
+                      <Link to="/jobs">Jobs</Link>
+                    </li>
+                  </>
+                )}
               </>
             ) : (
               <>
@@ -54,12 +73,10 @@ const Navbar = () => {
                 <li>
                   <Link to="/jobs">Jobs</Link>
                 </li>
-                <li>
-                  <Link to="/browse">Browse</Link>
-                </li>
               </>
             )}
           </ul>
+
           {!user ? (
             <div className="flex items-center gap-2">
               <Link to="/login">
@@ -76,7 +93,7 @@ const Navbar = () => {
               <PopoverTrigger asChild>
                 <Avatar className="cursor-pointer">
                   <AvatarImage
-                    src={user?.profile?.profilePhoto}
+                    src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
                     alt="@shadcn"
                   />
                 </Avatar>
@@ -86,7 +103,7 @@ const Navbar = () => {
                   <div className="flex gap-2 space-y-2">
                     <Avatar className="cursor-pointer">
                       <AvatarImage
-                        src={user?.profile?.profilePhoto}
+                        src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
                         alt="@shadcn"
                       />
                     </Avatar>
@@ -98,15 +115,16 @@ const Navbar = () => {
                     </div>
                   </div>
                   <div className="flex flex-col my-2 text-gray-600">
-                    {user && user.role === "student" && (
-                      <div className="flex w-fit items-center gap-2 cursor-pointer">
-                        <User2 />
-                        <Button variant="link">
-                          {" "}
-                          <Link to="/profile">View Profile</Link>
-                        </Button>
-                      </div>
-                    )}
+                    {user &&
+                      (user.role === "student" || user.role === "company") && (
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <User2 />
+                          <Button variant="link">
+                            {" "}
+                            <Link to="/profile">View Profile</Link>
+                          </Button>
+                        </div>
+                      )}
 
                     <div className="flex w-fit items-center gap-2 cursor-pointer">
                       <LogOut />
