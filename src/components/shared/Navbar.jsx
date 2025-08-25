@@ -7,7 +7,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "firebase/auth";
 import { auth } from "@/utils/constant";
+<<<<<<< HEAD
 
+=======
+>>>>>>> 80402c6dff7e8ef557ed4d97e93bcb3db9924333
 import { setUser } from "@/redux/authSlice";
 import { toast } from "sonner";
 
@@ -77,7 +80,11 @@ const Navbar = () => {
               <PopoverTrigger asChild>
                 <Avatar className="cursor-pointer">
                   <AvatarImage
+<<<<<<< HEAD
                     src={user?.profile?.profilePhoto}
+=======
+                    src= "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0="
+>>>>>>> 80402c6dff7e8ef557ed4d97e93bcb3db9924333
                     alt="@shadcn"
                   />
                 </Avatar>
@@ -87,7 +94,11 @@ const Navbar = () => {
                   <div className="flex gap-2 space-y-2">
                     <Avatar className="cursor-pointer">
                       <AvatarImage
+<<<<<<< HEAD
                         src={user?.profile?.profilePhoto}
+=======
+                        src= "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0="
+>>>>>>> 80402c6dff7e8ef557ed4d97e93bcb3db9924333
                         alt="@shadcn"
                       />
                     </Avatar>
