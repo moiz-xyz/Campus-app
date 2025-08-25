@@ -9,17 +9,16 @@ import {
   TableRow,
 } from "../ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import {  MoreHorizontal, Ban, Unlock } from "lucide-react";
+import { Edit2, MoreHorizontal } from "lucide-react";
 import { useSelector } from "react-redux";
-import { getDatabase, ref, update } from "firebase/database";
-import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const CompaniesTable = () => {
   const { companies, searchCompanyByText } = useSelector(
     (store) => store.company
   );
   const [filterCompany, setFilterCompany] = useState(companies);
-  const db = getDatabase();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const filteredCompany =
@@ -34,14 +33,6 @@ const CompaniesTable = () => {
       });
     setFilterCompany(filteredCompany);
   }, [companies, searchCompanyByText]);
-
-  const toggleBlockCompany = async (company) => {
-    const newStatus = company.status === "blocked" ? "active" : "blocked";
-    await update(ref(db, `companies/${company.id}`), {
-      status: newStatus,
-    });
-    toast(`Company ${newStatus === "blocked" ? "Blocked" : "Unblocked"} Successfully!`);
-  };
 
   return (
     <div>
@@ -59,37 +50,33 @@ const CompaniesTable = () => {
         <TableBody>
           {filterCompany?.map((company) => (
             <TableRow key={company.id}>
+    
               <TableCell>{company.name}</TableCell>
+
               <TableCell>{company.website || "N/A"}</TableCell>
+
               <TableCell>{company.location || "N/A"}</TableCell>
               <TableCell>
                 {company.createdAt
                   ? new Date(company.createdAt).toLocaleDateString()
                   : "N/A"}
               </TableCell>
+
+              {/* Action */}
               <TableCell className="text-right cursor-pointer">
                 <Popover>
                   <PopoverTrigger>
                     <MoreHorizontal />
                   </PopoverTrigger>
-                  <PopoverContent className="w-40">
-
-
+                  <PopoverContent className="w-32">
                     <div
-                      onClick={() => toggleBlockCompany(company)}
-                      className="flex items-center gap-2 w-fit cursor-pointer text-red-600"
+                      onClick={() =>
+                        navigate(`/companies/${company.id}`)
+                      }
+                      className="flex items-center gap-2 w-fit cursor-pointer"
                     >
-                      {company.status === "blocked" ? (
-                        <>
-                          <Unlock className="w-4" />
-                          <span>Unblock</span>
-                        </>
-                      ) : (
-                        <>
-                          <Ban className="w-4" />
-                          <span>Block</span>
-                        </>
-                      )}
+                      <Edit2 className="w-4" />
+                      <span>Edit</span>
                     </div>
                   </PopoverContent>
                 </Popover>

@@ -1,13 +1,15 @@
 import AdminJobs from "@/components/admin/AdminJobs";
 import Applicants from "@/components/admin/Applicants";
-import Companies from "@/components/admin/Companies";
-import CompanyCreate from "@/components/admin/CompanyCreate";
-import CompanySetup from "@/components/admin/CompanySetup";
-import PostJob from "@/components/admin/PostJob";
-import ProtectedRoute from "@/components/admin/ProtectedRoute";
+
 import Login from "@/components/auth/Login";
 import Signup from "@/components/auth/Signup";
 import Browse from "@/components/Browse";
+import Companies from "@/components/company/Companies";
+import CompanyCreate from "@/components/company/CompanyCreate";
+import CompanyJobs from "@/components/company/CompanyJobs";
+import CompanySetup from "@/components/company/CompanySetup";
+import PostJob from "@/components/company/PostJob";
+import ProtectedComapnyRoute from "@/components/company/ProtectedComapnyRoute";
 import Home from "@/components/Home";
 import JobDescription from "@/components/JobDescription";
 import Jobs from "@/components/Jobs";
@@ -27,53 +29,53 @@ function AppRouter() {
         <Route path="/browse" element={<Browse />} />
         <Route path="/profile" element={<Profile />} />
 
-        {/* Admin Routes */}
-        <Route
-          path="/admin/companies"
+        {/* company routes */}
+         <Route
+          path="/companies"
           element={
-            <ProtectedRoute>
+            <ProtectedComapnyRoute>
               <Companies />
-            </ProtectedRoute>
+            </ProtectedComapnyRoute>
           }
         />
         <Route
-          path="/admin/companies/create"
+          path="/companies/create"
           element={
-            <ProtectedRoute>
+            <ProtectedComapnyRoute>
               <CompanyCreate />
-            </ProtectedRoute>
+            </ProtectedComapnyRoute>
           }
         />
         <Route
-          path="/admin/companies/:id"
+          path="/companies/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedComapnyRoute>
               <CompanySetup />
-            </ProtectedRoute>
+            </ProtectedComapnyRoute>
           }
         />
         <Route
-          path="/admin/jobs"
+          path="/company/jobs"
           element={
-            <ProtectedRoute>
-              <AdminJobs />
-            </ProtectedRoute>
+            <ProtectedComapnyRoute>
+              <CompanyJobs />
+            </ProtectedComapnyRoute>
           }
         />
         <Route
-          path="/admin/jobs/create"
+          path="/jobs/create"
           element={
-            <ProtectedRoute>
+            <ProtectedComapnyRoute>
               <PostJob />
-            </ProtectedRoute>
+            </ProtectedComapnyRoute>
           }
         />
         <Route
-          path="/admin/jobs/:id/applicants"
+          path="/jobs/:id/applicants"
           element={
-            <ProtectedRoute>
+            <ProtectedComapnyRoute>
               <Applicants />
-            </ProtectedRoute>
+            </ProtectedComapnyRoute>
           }
         />
       </Routes>

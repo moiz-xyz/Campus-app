@@ -1,14 +1,14 @@
-import React, { useState } from 'react'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
-import { Label } from './ui/label'
-import { Input } from './ui/input'
-import { Button } from './ui/button'
-import { Loader2 } from 'lucide-react'
-import { useDispatch, useSelector } from 'react-redux'
-import { setUser } from '@/redux/authSlice'
-import { toast } from 'sonner'
-import { db } from '@/utils/constant'
-import { doc, updateDoc } from 'firebase/firestore'
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import { Label } from './ui/label';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { Loader2 } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '@/redux/authSlice';
+import { toast } from 'sonner';
+import { db } from '@/utils/constant';
+import { ref, update } from 'firebase/database';
 
 const UpdateProfileDialog = ({ open, setOpen }) => {
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
-  }
+  };
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -33,11 +33,11 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     try {
       setLoading(true);
 
-      // Reference to Firestore doc for this user
-      const userRef = doc(db, "users", user.uid);
+      // Reference to the user in Realtime Database
+      const userRef = ref(db, `users/${user.uid}`);
 
-      // Update fields in Firestore
-      await updateDoc(userRef, {
+      // Update fields in Realtime Database
+      await update(userRef, {
         fullname: input.fullname,
         email: input.email,
         phoneNumber: input.phoneNumber,
@@ -64,7 +64,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div>
@@ -139,7 +139,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
+  );
+};
 
-export default UpdateProfileDialog
+export default UpdateProfileDialog;

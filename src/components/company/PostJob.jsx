@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
 import { db } from "@/utils/constant"; 
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { ref, push, set } from "firebase/database";
 
 const PostJob = () => {
   const [input, setInput] = useState({
@@ -27,7 +27,6 @@ const PostJob = () => {
 
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const { companies } = useSelector((store) => store.company);
 
   const changeEventHandler = (e) => {
@@ -38,7 +37,7 @@ const PostJob = () => {
     const selectedCompany = companies.find(
       (company) => company.name.toLowerCase() === value
     );
-    setInput({ ...input, companyId: selectedCompany?.id }); // 👈 Firestore doc id of company
+    setInput({ ...input, companyId: selectedCompany?.id });
   };
 
   const submitHandler = async (e) => {
@@ -52,14 +51,16 @@ const PostJob = () => {
     try {
       setLoading(true);
 
-      await addDoc(collection(db, "jobs"), {
+      // Create a new reference (auto-generated key) in Realtime DB
+      const newJobRef = push(ref(db, "jobs"));
+      await set(newJobRef, {
         ...input,
-        createdAt: serverTimestamp(),
-        applications: [], // start empty
+        createdAt: Date.now(), // timestamp
+        applications: [],      // start empty
       });
 
       toast.success("Job posted successfully!");
-      navigate("/admin/jobs");
+      navigate("/company/jobs");
     } catch (error) {
       console.error(error);
       toast.error("Failed to post job!");

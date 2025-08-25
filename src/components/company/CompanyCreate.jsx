@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useDispatch } from 'react-redux';
 import { setSingleCompany } from '@/redux/companySlice';
 import { db } from '@/utils/constant';
-import { addDoc, collection } from "firebase/firestore";
+import { ref, push, set } from 'firebase/database';
 
 const CompanyCreate = () => {
     const navigate = useNavigate();
@@ -22,26 +22,24 @@ const CompanyCreate = () => {
         }
 
         try {
-            // Add new company to Firestore
-            const docRef = await addDoc(collection(db, "companies"), {
+            const newCompanyRef = push(ref(db, "companies"));
+            await set(newCompanyRef, {
                 name: companyName,
-                createdAt: new Date(),
+                createdAt: Date.now(),
             });
 
             const newCompany = {
-                id: docRef.id,
+                id: newCompanyRef.key,
                 name: companyName,
-                createdAt: new Date(),
+                createdAt: Date.now(),
             };
 
             // Update Redux store
             dispatch(setSingleCompany(newCompany));
 
-            // Show success
             toast.success("Company registered successfully!");
 
-            // Navigate to company detail page
-            navigate(`/admin/companies/${docRef.id}`);
+            navigate(`/admin/companies/${newCompanyRef.key}`);
         } catch (error) {
             console.error("Error registering company:", error);
             toast.error("Failed to create company. Try again.");

@@ -1,22 +1,26 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setAllAppliedJobs } from "@/redux/jobSlice";
-import { getDocs, collection } from "firebase/firestore";
+import { ref, get } from "firebase/database";
 import { db } from "@/utils/constant";
+
 const useGetAppliedJobs = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchAppliedJobs = async () => {
       try {
-        // reference to the "applications" collection in Firestore
-        const querySnapshot = await getDocs(collection(db, "applications"));
+        const applicationsRef = ref(db, "applications"); // path to applications
+        const snapshot = await get(applicationsRef);
 
-        // convert docs to plain JS objects
-        const applications = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const applications = [];
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          // Realtime DB returns an object with keys as IDs
+          for (const id in data) {
+            applications.push({ id, ...data[id] });
+          }
+        }
 
         console.log(applications);
 

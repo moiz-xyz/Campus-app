@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
 import useGetCompanyById from '@/hooks/useGetCompanyById';
 import { db } from '@/utils/constant';
-import { doc, updateDoc } from 'firebase/firestore';
+import { ref, update } from 'firebase/database';
 
 const CompanySetup = () => {
     const params = useParams();
@@ -36,14 +36,14 @@ const CompanySetup = () => {
         try {
             setLoading(true);
 
-            // Update Firestore company document
-            const companyRef = doc(db, "companies", params.id);
-            await updateDoc(companyRef, {
+            // Reference to company in Realtime Database
+            const companyRef = ref(db, `companies/${params.id}`);
+            await update(companyRef, {
                 name: input.name,
                 description: input.description,
                 website: input.website,
                 location: input.location,
-                updatedAt: new Date(),
+                updatedAt: Date.now(), // timestamp
             });
 
             toast.success("Company updated successfully!");

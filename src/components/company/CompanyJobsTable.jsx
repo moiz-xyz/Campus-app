@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -13,14 +13,14 @@ import { Edit2, Eye, MoreHorizontal } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const AdminJobsTable = () => {
+const CompanyJobsTable = () => {
   const { allAdminJobs, searchJobByText } = useSelector((store) => store.job);
+  const { companies } = useSelector((store) => store.company);
 
   const [filterJobs, setFilterJobs] = useState(allAdminJobs);
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("called");
     const filteredJobs = allAdminJobs.filter((job) => {
       if (!searchJobByText) {
         return true;
@@ -47,13 +47,13 @@ const AdminJobsTable = () => {
         <TableBody>
           {filterJobs?.map((job) => (
             <tr>
-              <TableCell>{job?.company?.name}</TableCell>
+              <TableCell>
+                {companies.find((c) => c.id === job.companyId)?.name || "N/A"}
+              </TableCell>
               <TableCell>{job?.title}</TableCell>
               <TableCell>
                 {job?.createdAt
-                  ? new Date(job.createdAt.seconds * 1000)
-                      .toISOString()
-                      .split("T")[0]
+                  ? new Date(job.createdAt).toISOString().split("T")[0]
                   : "N/A"}
               </TableCell>
 
@@ -64,9 +64,14 @@ const AdminJobsTable = () => {
                   </PopoverTrigger>
                   <PopoverContent className="w-32">
                     <div
-                      onClick={() =>
-                        navigate(`/admin/jobs/${job.id}/applicants`)
-                      }
+                      onClick={() => navigate(`/companies/${job.id}`)}
+                      className="flex items-center gap-2 w-fit cursor-pointer"
+                    >
+                      <Edit2 className="w-4" />
+                      <span>Edit</span>
+                    </div>
+                    <div
+                      onClick={() => navigate(`/jobs/${job.id}/applicants`)}
                       className="flex items-center w-fit gap-2 cursor-pointer mt-2"
                     >
                       <Eye className="w-4" />
@@ -83,4 +88,4 @@ const AdminJobsTable = () => {
   );
 };
 
-export default AdminJobsTable;
+export default CompanyJobsTable;

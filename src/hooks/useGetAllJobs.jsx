@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setAllJobs } from "@/redux/jobSlice";
-import {  collection, getDocs, query, where } from "firebase/firestore";
+import { ref, get, query, orderByChild, startAt, endAt } from "firebase/database";
+import { db } from "@/utils/constant";
 
-import { db } from "@/utils/constant"; 
 const useGetAllJobs = () => {
   const dispatch = useDispatch();
   const { searchedQuery } = useSelector((store) => store.job);
@@ -11,21 +11,29 @@ const useGetAllJobs = () => {
   useEffect(() => {
     const fetchAllJobs = async () => {
       try {
-        const jobsRef = collection(db, "jobs"); // jobs collection in Firestore
-        let q;
+        const jobsRef = ref(db, "jobs");
 
+        let jobsSnapshot;
         if (searchedQuery) {
-          // If you want to filter by title or keyword
-          q = query(jobsRef, where("title", ">=", searchedQuery), where("title", "<=", searchedQuery + "\uf8ff"));
+          // Realtime DB supports simple range queries on a single child
+          const jobsQuery = query(
+            jobsRef,
+            orderByChild("title"),
+            startAt(searchedQuery),
+            endAt(searchedQuery + "\uf8ff")
+          );
+          jobsSnapshot = await get(jobsQuery);
         } else {
-          q = query(jobsRef); // fetch all jobs if no search
+          jobsSnapshot = await get(jobsRef); // fetch all jobs
         }
 
-        const querySnapshot = await getDocs(q);
-        const jobs = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const jobs = [];
+        if (jobsSnapshot.exists()) {
+          const data = jobsSnapshot.val();
+          for (const id in data) {
+            jobs.push({ id, ...data[id] });
+          }
+        }
 
         dispatch(setAllJobs(jobs));
       } catch (error) {

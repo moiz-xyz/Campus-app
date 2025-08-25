@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setSingleCompany } from "@/redux/companySlice";
-import { doc, getDoc } from "firebase/firestore";
+import { ref, get } from "firebase/database";
 import { db } from "@/utils/constant"; 
+
 const useGetCompanyById = (companyId) => {
   const dispatch = useDispatch();
 
@@ -11,17 +12,17 @@ const useGetCompanyById = (companyId) => {
 
     const fetchSingleCompany = async () => {
       try {
-        const companyRef = doc(db, "companies", companyId); 
-        const companySnap = await getDoc(companyRef);
+        const companyRef = ref(db, `companies/${companyId}`); // path to company
+        const snapshot = await get(companyRef);
 
-        if (companySnap.exists()) {
-          const companyData = { id: companySnap.id, ...companySnap.data() };
+        if (snapshot.exists()) {
+          const companyData = { id: companyId, ...snapshot.val() };
           dispatch(setSingleCompany(companyData));
         } else {
-          console.warn("Company not found in Firestore");
+          console.warn("Company not found in Realtime Database");
         }
       } catch (error) {
-        console.error("Error fetching company from Firestore:", error);
+        console.error("Error fetching company from Realtime Database:", error);
       }
     };
 
